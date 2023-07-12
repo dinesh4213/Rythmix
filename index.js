@@ -9,6 +9,7 @@ const songRoutes = require('./routes/song');
 require("dotenv").config();
 const app = express();
 const port = 80;
+const cors = require("cors");
 
 
 // console.log(process.env);
@@ -17,7 +18,7 @@ const port = 80;
 // mongoose.connect()  takes 2 arguments.   1. which db to connect(url)
 //											2. 
 
-
+app.use(cors());
 app.use(express.json());
 
 mongoose
@@ -38,31 +39,32 @@ mongoose
 
 // set-up Passport - jwt
 let opts = {}
-// opts.jwtFromRequest = ExtractJwt.fromBodyField("Authorization");
-// opts.jwtFromRequest = ExtractJwt.fromHeader("Authorization");
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
-
-opts.secretOrKey = process.env.JWT_SECRET_KEY;
+opts.secretOrKey = "thisKeyIsSupposedToBeSecret";
 // opts.issuer = 'accounts.examplesoft.com';
 // opts.audience = 'yoursite.net';
-passport.use(new JwtStrategy(opts, function (jwt_payload, done) {
-	User.findOne({ id: jwt_payload.sub }, function (err, user) {
-		if (err) {
-			console.log("nhin ho rha")
-			return done(err, false);
-		}
+try {
+
+	passport.use(new JwtStrategy(opts, function (jwt_payload, done) {
+		const user = User.findOne({ _id: jwt_payload.identifier })
 		if (user) {
+			// console.log(user);
 			console.log("ho to gaya");
+			// req.user = user;
+			console.log(user._id);
+			// console.log(jwt_payload.identifier);
 			return done(null, user);
 		} else {
 			console.log("hoga hi nhin");
 			return done(null, false);
 			// or you could create a new account
 		}
-	});
-	// console.log("Ho gaya")
-})
-);
+	})
+	);
+} catch (err) {
+	console.error(err.message);
+	return res.status(401).send("Server Error");
+}
 
 app.use("/auth", authRoutes);
 app.use("/song", songRoutes);

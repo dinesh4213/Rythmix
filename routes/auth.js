@@ -35,7 +35,7 @@ router.post("/register", async (req, res) => {
 	user.password = await bcrypt.hash(password, salt);
 
 	// Creating the toekn to return to user
-	const token = getToken(email, user);
+	const token = await getToken(email, user);
 
 	const userToReturn = { ...user.toJSON(), token };
 	delete userToReturn.password;
@@ -53,14 +53,15 @@ router.post("/login", async (req, res) => {
 			return res.status(403).json({ err: "Invalid Credentials 1" });
 		}
 		const hash = user.password;
-		await bcrypt.compare(password, hash, function (err, result) {
+		await bcrypt.compare(password, hash, async function (err, result) {
 			if (err) {
 				console.error(err.message);
-				res.status(401).send("Internal Error");
+				return res.status(401).send("Internal Error");
 			}
 			console.log(result);
-			if (result) {
-				const token = getToken(email, user);
+
+			if (result === true) {
+				const token = await getToken(user.email, user);
 
 				const userToReturn = { ...user.toJSON(), token };
 				delete userToReturn.password;
