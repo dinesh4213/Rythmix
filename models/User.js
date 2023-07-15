@@ -18,6 +18,10 @@ const User = new mongoose.Schema({
 		type: String,
 		required: true
 	},
+	gender: {
+		type: String,
+		required: true
+	},
 	username: {
 		type: String,
 		required: true
@@ -37,5 +41,4 @@ const User = new mongoose.Schema({
 });
 
 const UserModel = mongoose.model("User", User);
-
 module.exports = UserModel;

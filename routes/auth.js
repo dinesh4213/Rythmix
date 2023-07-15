@@ -1,84 +1,139 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
+const auth = require('../middleware/auth')
 const bcrypt = require('bcrypt');
-const { getToken } = require('../utils/helper');
-// const { promisify } = require("util");
+const jwt = require('jsonwebtoken');
+const { check, validationResult } = require('express-validator');
+require('dotenv').config();
 
-// This POST route will help to register a user
-router.post("/register", async (req, res) => {
-	// This code is run whn the register api is called as a POST request
-	//  my req.body will be of the format {email, password,fn,ln,username};
-
-	const { email, password, firstName, lastName, username } = req.body;
-
-	let user = await User.findOne({ email: email });
-	if (user) {
-		return res
-			.status(403)
-			.json({ error: "A user with this email already exists" });
+// Authorizing a user
+router.get('/', auth, async (req, res) => {
+	try {
+		const user = await User.findById(req.user.id).select('-password');
+		return res.json(user);
+	} catch (err) {
+		console.error(err.message);
+		return res.status(500).send('Server Error');
 	}
-
-	// Creating a new user 
-	// password converted to hash
-	// const hashedPassword = bcrypt.hash(password, '10');
-
-	user = new User({
-		email,
-		password,
-		firstName,
-		lastName,
-		username
-	});
-
-	const salt = await bcrypt.genSalt(10);
-	user.password = await bcrypt.hash(password, salt);
-
-	// Creating the toekn to return to user
-	const token = await getToken(email, user);
-
-	const userToReturn = { ...user.toJSON(), token };
-	delete userToReturn.password;
-	await user.save();
-	return res.status(200).json(userToReturn);
 });
 
+// Create a User
+router.post("/register", [
+	check('email', 'Please include a valid email').isEmail(),
+	check('password', 'Password is required').exists(),
+	check('firstName', 'Name is required')
+		.not()
+		.isEmpty(),
+	check('gender', 'gender is required')
+		.not()
+		.isEmpty(),
+	check('username', 'username is required')
+		.not()
+		.isEmpty(),
+], async (req, res) => {
 
-router.post("/login", async (req, res) => {
+	const errors = validationResult(req);
+	if (!errors.isEmpty()) {
+		return res.status(400).json({ errors: errors.array() });
+	}
+
+	const { email, password, firstName, lastName, username, gender } = req.body;
+
 	try {
-		const { email, password } = req.body;
-		const user = await User.findOne({ email: email });
+		let user = await User.findOne({ email: email });
+		if (user) {
+			return res.status(403).json({ error: "A user with this email already exists" });
+		}
 
+		user = new User({
+			email,
+			password,
+			firstName,
+			lastName,
+			username,
+			gender
+		});
+
+		const salt = await bcrypt.genSalt(10);
+		user.password = await bcrypt.hash(password, salt);   // password hash
+
+		await user.save();
+
+		const payload = {
+			user: {
+				id: user.id
+			}
+		};
+		jwt.sign(
+			payload,
+			process.env.JWT_SECRET_KEY,
+			{ expiresIn: 360000 },
+			(err, token) => {
+				if (err) throw err;
+				const userToReturn = { ...user.toJSON(), token };
+				delete userToReturn.password;
+				return res.json({ ...user.toJSON(), token });
+			}
+		);
+	} catch (err) {
+		console.error(err.message);
+		res.status(500).send('Server Error');
+	}
+});
+
+// Login request
+router.post("/login", [
+	check('email', 'Please include a valid email').isEmail(),
+	check('password', 'Password is required').exists()
+], async (req, res) => {
+
+	try {
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			return res.status(400).json({ errors: errors.array() });
+		}
+
+		const { email, password } = req.body;
+
+		let user = await User.findOne({ email: email });
 		if (!user) {
 			return res.status(403).json({ err: "Invalid Credentials 1" });
 		}
+
 		const hash = user.password;
 		await bcrypt.compare(password, hash, async function (err, result) {
 			if (err) {
 				console.error(err.message);
 				return res.status(401).send("Internal Error");
 			}
-			console.log(result);
 
 			if (result === true) {
-				const token = await getToken(user.email, user);
-
-				const userToReturn = { ...user.toJSON(), token };
-				delete userToReturn.password;
-
-				return res.status(200).json(userToReturn);
+				const payload = {
+					user: {
+						id: user.id
+					}
+				};
+				jwt.sign(
+					payload,
+					process.env.JWT_SECRET_KEY,
+					{ expiresIn: 360000 },
+					(err, token) => {
+						if (err) throw err;
+						const userToReturn = { ...user.toJSON(), token };
+						delete userToReturn.password;
+						return res.status(200).json(userToReturn);
+					}
+				);
 			}
 			else {
 				return res.status(403).json({ err: "Invalid Credentials 2" });
 			}
 		});
-	}
-	catch (err) {
+	} catch (err) {
 		console.error(err.message);
-		res.status(401).send("Server Error");
+		res.status(500).send('Server Error');
 	}
 });
-
-
 
 module.exports = router;
