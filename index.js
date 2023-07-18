@@ -3,8 +3,9 @@ const express = require("express");
 const authRoutes = require("./routes/auth");
 const songRoutes = require("./routes/song");
 const playlistRoutes = require("./routes/playlist");
-require('dotenv').config();
+const cors = require("cors");
 const app = express();
+require('dotenv').config();
 
 const connectDB = async () => {
 	try {
@@ -20,6 +21,7 @@ const connectDB = async () => {
 	}
 };
 
+app.use(cors());
 connectDB();
 app.use(express.json({ extended: false }));
 

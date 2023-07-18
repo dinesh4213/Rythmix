@@ -45,6 +45,10 @@ router.post("/register", [
 		if (user) {
 			return res.status(403).json({ error: "A user with this email already exists" });
 		}
+		user = await User.findOne({ username: username });
+		if (user) {
+			return res.status(403).json({ error: "Username not available" });
+		}
 
 		user = new User({
 			email,
