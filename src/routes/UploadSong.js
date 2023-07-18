@@ -41,12 +41,12 @@ const UploadSong = () => {
 					</div>
 				</div>
 				<div className='border border-solid border-black bg-black mt-3 pt-8 pl-4 pb-20 ml-2 mr-2 rounded-lg flex space-y-3 flex-col'>   {/*Left side options*/}
-					<IconText iconName={"bxs:home"} displayText={"Home"} active />
+					<IconText iconName={"bxs:home"} displayText={"Home"} targetLink={"/home"} />
 					<IconText iconName={"mdi:search"} displayText={"Search"} />
 					<IconText iconName={"fluent:library-28-regular"} displayText={"Library"} />
 					<IconText iconName={"iconoir:playlist-add"} displayText={"Create Playlist"} />
 					<IconText iconName={"bxs:heart"} displayText={"Liked Songs"} />
-					<IconText iconName={"arcticons:line-music"} displayText={"My Songs"} />
+					<IconText iconName={"arcticons:line-music"} displayText={"My Songs"} targetLink={"/myMusic"} />
 
 				</div>
 				<div className='text-gray-500 justify-end flex flex-col text-gray-400 border border-solid border-black bg-black ml-2 mr-2 mt-2 h-52 rounded-lg pl-4 pt-6 pb-2 text-xs space-y-1'>

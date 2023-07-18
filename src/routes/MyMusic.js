@@ -23,7 +23,7 @@ const MyMusic = () => {
 	}, []);
 
 	return (
-		<LoggedInContainer>
+		<LoggedInContainer curActiveScreen="myMusic">
 			<div className='flex flex-col h-full'>
 				<div className='text-red-600 text-3xl font-bold mt-6 ml-12 mb-3'>
 					Music List

@@ -90,7 +90,7 @@ const trendingArtists = [
 
 const Home = () => {
 	return (
-		<LoggedInContainer>
+		<LoggedInContainer curActiveScreen="home">
 			<div className='pl-4 mt-5 flex flex-col overflow-auto'>
 				<div className='content pt-2 pb-3 mt-1 pl-4'>
 					<PlaylistView
