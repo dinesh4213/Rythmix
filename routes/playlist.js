@@ -47,7 +47,14 @@ router.post("/create", [auth,
 router.get("/get/playlist/:playlistId", auth, async (req, res) => {
 	try {
 		const playlistId = req.params.playlistId;
-		const playlist = await Playlist.findOne({ _id: playlistId });
+		const playlist = await Playlist.findOne({ _id: playlistId }).populate(
+			{
+				path: "songs",
+				populate: {
+					path: "artist"
+				}
+			},
+		).populate("owner");
 		if (!playlist) {
 			return res.status(301).json({ err: "Invalid ID" });
 		}
@@ -63,6 +70,25 @@ router.get("/get/playlist/:playlistId", auth, async (req, res) => {
 router.get("/get/me", auth, async (req, res) => {
 	try {
 		const artistId = req.user.id;
+		const playlists = await Playlist.find({ owner: artistId }).populate("owner");
+		return res.status(200).json({ data: playlists });
+	} catch (err) {
+		console.error(err.message);
+		return res.status(500).send('Server Error');
+	}
+});
+
+
+// Get all playlist by me
+router.get("/get/me", auth, async (req, res) => {
+
+	const artistId = req.user.id;
+	try {
+		const artist = await User.findOne({ _id: artistId });
+		if (!artist) {
+			return res.status(304).json({ err: "Invalid Artist ID" });
+		}
+
 		const playlists = await Playlist.find({ owner: artistId }).populate("owner");
 		return res.status(200).json({ data: playlists });
 	} catch (err) {
@@ -117,7 +143,7 @@ router.post("/add/song", [auth,
 			return res.status(400).json({ err: "Not allowed" });
 		}
 
-		const song = await Song.findOne({ _id: songId });
+		let song = await Song.findOne({ _id: songId });
 		if (!song) {
 			return res.status(304).json({ err: "Song does not exist" });
 		}

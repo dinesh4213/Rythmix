@@ -8,7 +8,7 @@ const { check, validationResult } = require('express-validator');
 require('dotenv').config();
 
 // Authorizing a user
-router.get('/', auth, async (req, res) => {
+router.get('/profile', auth, async (req, res) => {
 	try {
 		const user = await User.findById(req.user.id).select('-password');
 		return res.json(user);
