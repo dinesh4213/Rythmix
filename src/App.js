@@ -6,8 +6,13 @@ import SignupComponent from './routes/Signup';
 import HomeComponent from './routes/Home';
 import MyMusic from './routes/MyMusic';
 import SearchPage from './routes/SearchPage';
+import Library from './routes/Library';
+import Premium from './routes/Premium';
+import Download from './routes/Download';
+import Profile from './routes/Profile';
+import SinglePlaylistView from './routes/SinglePlaylistView';
 import LoggedInHomeComponent from './routes/LoggedInHome';
-import { BrowserRouter as Router, Routes, Route, Navigate, useAsyncError } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LoadingBar from 'react-top-loading-bar';
 import UploadSong from './routes/UploadSong';
 import { useCookies } from "react-cookie";
@@ -32,6 +37,12 @@ function App() {
               <Route path='/mysong' element={<UploadSong />} />
               <Route path='/myMusic' element={<MyMusic />} />
               <Route path='/search' element={<SearchPage />} />
+              <Route path='/library' element={<Library />} />
+              <Route path='/premium' element={<Premium />} />
+              <Route path='/download' element={<Download />} />
+              <Route path='/profile' element={<Profile />} />
+              <Route path='/playlist/:playlistId' element={<SinglePlaylistView />} />
+
               <Route path='*' element={<Navigate to="/home" />} />
             </Routes>
           </songContext.Provider>

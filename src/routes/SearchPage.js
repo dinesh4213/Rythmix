@@ -11,7 +11,7 @@ const SearchPage = () => {
 
 	const searchSong = async () => {
 		const response = await makeAuthenticatedGETrequest(
-			"/song/get/songName/" + searchText
+			"/song/get/songname/" + searchText
 		);
 		setSongData(response.data);
 	};
@@ -48,7 +48,7 @@ const SearchPage = () => {
 				{songData.length > 0 ? (
 					<div className="pt-6 pl-6 space-y-3">
 						<div className="text-white ml-4">
-							Showing search results for
+							Search results for
 							<span className="font-bold"> {searchText}</span>
 						</div>
 						<div className="flex flex-row space-x-6">
@@ -64,7 +64,7 @@ const SearchPage = () => {
 						</div>
 					</div>
 				) : (
-					<div className="text-gray-400 pt-10">
+					<div className="text-gray-400 pt-10 ml-12">
 						Nothing to show here.
 					</div>
 				)}
